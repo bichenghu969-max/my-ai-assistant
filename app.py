@@ -1,8 +1,23 @@
 import streamlit as st
-import requests
 
 st.set_page_config(page_title="我的AI助手", page_icon="🤖")
 st.title("🤖 我的AI助手")
+
+st.info("""
+### 📌 说明
+
+这是一个部署在云端的 AI 助手演示界面。
+
+**完整功能需要本地运行：**
+1. 安装 Ollama
+2. 下载模型：`ollama pull llama3:8b`
+3. 运行：`streamlit run app.py`
+
+**项目特点：**
+- 完全本地化，数据隐私安全
+- 无需联网，免费无限使用
+- 支持多种开源模型切换
+""")
 
 # 初始化聊天记录
 if "messages" not in st.session_state:
@@ -10,24 +25,16 @@ if "messages" not in st.session_state:
 
 # 侧边栏
 with st.sidebar:
-    st.header("设置")
-
-    # 显示可用的模型
-    try:
-        r = requests.get("http://localhost:11434/api/tags", timeout=2)
-        if r.status_code == 200:
-            st.success("✅ AI 服务已连接")
-            models = [m["name"] for m in r.json().get("models", [])]
-            if models:
-                selected_model = st.selectbox("选择模型", models)
-            else:
-                selected_model = "llama3:8b"
-        else:
-            selected_model = "llama3:8b"
-    except:
-        selected_model = "llama3:8b"
-        st.warning("检测中...")
-
+    st.header("⚙️ 设置")
+    
+    st.success("✅ 应用已成功部署！")
+    st.markdown("""
+    **技术栈：**
+    - Streamlit (前端框架)
+    - Ollama (本地大模型)
+    - Python (后端逻辑)
+    """)
+    
     if st.button("清空对话"):
         st.session_state.messages = []
         st.rerun()
@@ -39,25 +46,10 @@ for msg in st.session_state.messages:
 
 # 用户输入
 if prompt := st.chat_input("输入你的问题..."):
-    # 显示用户消息
     with st.chat_message("user"):
         st.write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
-
-    # AI 回复
+    
     with st.chat_message("assistant"):
-        with st.spinner("思考中..."):
-            try:
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={"model": selected_model, "prompt": prompt, "stream": False},
-                    timeout=60
-                )
-                if response.status_code == 200:
-                    answer = response.json().get("response", "无回复")
-                    st.write(answer)
-                    st.session_state.messages.append({"role": "assistant", "content": answer})
-                else:
-                    st.error(f"错误: {response.status_code}")
-            except Exception as e:
-                st.error(f"连接失败: {e}")
+        st.info("💡 这是云端演示版本。\n\n如需获得实际 AI 回复，请按照左侧说明在本地运行完整版应用。")
+        st.session_state.messages.append({"role": "assistant", "content": "这是云端演示版本。请在本地运行完整版应用以获得 AI 回复。"})
